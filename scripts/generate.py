@@ -5,7 +5,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
-from github import Github  # pyright: ignore[reportMissingImports]
+from dotenv import load_dotenv
+from github import Auth, Github  # pyright: ignore[reportMissingImports]
+
+
+load_dotenv()
 
 
 LORE_PATH = Path("lore.json")
@@ -34,7 +38,8 @@ def get_github_client() -> Github:
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
         raise RuntimeError("GITHUB_TOKEN environment variable is required.")
-    return Github(token)
+    auth = Auth.Token(token)
+    return Github(auth=auth)
 
 
 def get_repo(g: Github):
