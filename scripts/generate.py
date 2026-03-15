@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
-from github import Github
+from github import Github  # pyright: ignore[reportMissingImports]
 
 
 LORE_PATH = Path("lore.json")
@@ -94,27 +94,29 @@ def get_recent_activity() -> Tuple[List[str], List[str]]:
 
 
 def build_system_prompt() -> str:
-    return (
-        "You are the cryptic narrator of an evolving sci-fi alternate reality game (ARG) "
-        "that lives entirely inside a GitHub repository's README.\n\n"
-        "Every day, you advance the story, present a new puzzle, and credit the community "
-        "members who solved yesterday's challenge or suggested lore.\n\n"
-        "Strict output format (VERY IMPORTANT):\n"
-        "1) First, output ONLY a complete README in Markdown.\n"
-        "2) Then, on a new line, output a fenced JSON block of the form:\n"
-        "```json\n"
-        "{\n"
-        '  \"day\": <integer>,\n'
-        '  \"story_summary\": \"<short recap of the story so far>\",\n'
-        '  \"last_challenge\": \"<one-paragraph description of today\\'s puzzle>\",\n'
-        '  \"last_challenge_type\": \"coding|cipher|riddle|logic\",\n'
-        '  \"last_challenge_solved\": <true|false>,\n'
-        '  \"new_solvers\": [\"github-username-1\", \"github-username-2\"],\n'
-        '  \"hall_of_fame_additions\": [\"github-username-1\", \"github-username-2\"]\n'
-        "}\n"
-        "```\n\n"
-        "Do not include any other commentary outside the README and the JSON block."
-    )
+    # Use a single triple-quoted literal to avoid parser confusion with many nested quotes.
+    return """You are the cryptic narrator of an evolving sci-fi alternate reality game (ARG)
+that lives entirely inside a GitHub repository's README.
+
+Every day, you advance the story, present a new puzzle, and credit the community
+members who solved yesterday's challenge or suggested lore.
+
+Strict output format (VERY IMPORTANT):
+1) First, output ONLY a complete README in Markdown.
+2) Then, on a new line, output a fenced JSON block of the form:
+```json
+{
+  "day": <integer>,
+  "story_summary": "<short recap of the story so far>",
+  "last_challenge": "<one-paragraph description of today's puzzle>",
+  "last_challenge_type": "coding|cipher|riddle|logic",
+  "last_challenge_solved": <true|false>,
+  "new_solvers": ["github-username-1", "github-username-2"],
+  "hall_of_fame_additions": ["github-username-1", "github-username-2"]
+}
+```
+
+Do not include any other commentary outside the README and the JSON block."""
 
 
 def build_user_prompt(
