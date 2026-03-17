@@ -1,11 +1,14 @@
-## Solution Submission Template
-
-Copy this file to a new Markdown file under `solutions/` and fill it out.  
-For example: `solutions/day-1-your-username.md`.
-
+---
+day: [DAY_NUMBER]
+solver: [YOUR_GITHUB_USERNAME]
+date: [YYYY-MM-DD]
+solution: "[YOUR_SOLUTION_HERE]"
+puzzle_type: [cipher|code|logic]
 ---
 
-### Transmission Metadata
+# Day [X] Solution - [PUZZLE_NAME]
+
+## Transmission Metadata
 
 - **GitHub Username**: `your-username`
 - **Day / Puzzle Reference**: `Day X – Puzzle Title`
@@ -13,26 +16,44 @@ For example: `solutions/day-1-your-username.md`.
 
 ---
 
-### Your Reasoning
+## My Approach
 
-Explain how you approached the puzzle and the steps you took.
+[Explain your thought process and methodology]
 
 > Replace this block with your reasoning, calculations, intermediate steps, and thought process.
 
 ---
 
-### Final Answer
+## Solution
 
-Clearly state your final answer.
+[For cipher puzzles]
+The decoded message is: **[YOUR_ANSWER]**
 
-> Replace this line with your final answer.
+[For code puzzles]
+```python
+def your_solution():
+    # Your code here
+    pass
+```
+
+[For logic puzzles]
+The answer is: **[YOUR_ANSWER]**
 
 ---
 
-### Optional: Lore Twist
+## Explanation
 
-If you want to suggest a lore twist or story branch, describe it here.  
-You should also open an Issue in the repo with a short summary of this twist so it can be tracked as a lore suggestion.
+[Detailed explanation of how you arrived at the solution]
 
-> Replace this line with your proposed lore twist (if any).
+---
+
+## Additional Notes
+
+[Any interesting observations, alternative approaches, or Easter eggs you found]
+
+---
+
+**Solver:** @[YOUR_GITHUB_USERNAME]
+**Submitted:** [TIMESTAMP]
+**Status:** ⏳ Awaiting validation...
 

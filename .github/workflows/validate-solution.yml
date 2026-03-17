@@ -1,0 +1,193 @@
+name: Validate Solution & Auto-Respond
+
+on:
+  pull_request:
+    paths:
+      - 'solutions/**'
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install PyGithub
+      
+      - name: Get changed files
+        id: files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: solutions/**
+      
+      - name: Validate solution
+        id: validate
+        env:
+          CHANGED_FILES: ${{ steps.files.outputs.all_changed_files }}
+        run: |
+          # For each changed solution file
+          for file in $CHANGED_FILES; do
+            echo "Validating: $file"
+            
+            # Run validator
+            python scripts/validator.py "$file" > validation_output.txt
+            VALID=$?
+            
+            # Read output
+            FEEDBACK=$(cat validation_output.txt)
+            
+            # Set outputs
+            echo "valid=$VALID" >> $GITHUB_OUTPUT
+            echo "feedback<<EOF" >> $GITHUB_OUTPUT
+            echo "$FEEDBACK" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            # Store file path
+            echo "solution_file=$file" >> $GITHUB_OUTPUT
+          done
+      
+      - name: Extract solver info
+        id: solver
+        run: |
+          # Extract solver name from solution file
+          SOLVER=$(grep -oP '\*\*GitHub Username\*\*:\s*`\K[^`]+' ${{ steps.validate.outputs.solution_file }})
+          DAY=$(grep -oP '\*\*Day / Puzzle Reference\*\*:\s*`Day (\d+)' ${{ steps.validate.outputs.solution_file }} | grep -oP '\d+')
+          
+          echo "solver=$SOLVER" >> $GITHUB_OUTPUT
+          echo "day=$DAY" >> $GITHUB_OUTPUT
+      
+      - name: Check if first solve
+        id: first_solve
+        run: |
+          # Check if this is the first solve for this day
+          DAY=${{ steps.solver.outputs.day }}
+          
+          # Count existing solutions for this day
+          SOLVE_COUNT=$(find solutions/ -name "day-${DAY}-*.md" | wc -l)
+          
+          if [ $SOLVE_COUNT -eq 1 ]; then
+            echo "is_first=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_first=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Calculate streak
+        id: streak
+        run: |
+          # Check solver's previous solutions to calculate streak
+          SOLVER="${{ steps.solver.outputs.solver }}"
+          
+          # Count consecutive days (simplified - you can make this more sophisticated)
+          STREAK=$(find solutions/ -name "*${SOLVER}*.md" | wc -l)
+          
+          echo "streak=$STREAK" >> $GITHUB_OUTPUT
+      
+      - name: Generate response
+        id: response
+        env:
+          SOLVER: ${{ steps.solver.outputs.solver }}
+          DAY: ${{ steps.solver.outputs.day }}
+          IS_VALID: ${{ steps.validate.outputs.valid }}
+          IS_FIRST: ${{ steps.first_solve.outputs.is_first }}
+          STREAK: ${{ steps.streak.outputs.streak }}
+          FEEDBACK: ${{ steps.validate.outputs.feedback }}
+        run: |
+          # Generate immersive response
+          python scripts/generate_response.py \
+            --solver "$SOLVER" \
+            --day "$DAY" \
+            --valid "$IS_VALID" \
+            --first "$IS_FIRST" \
+            --streak "$STREAK" \
+            --feedback "$FEEDBACK" \
+            > response.txt
+          
+          # Set output
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          cat response.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const message = `${{ steps.response.outputs.message }}`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+      
+      - name: Auto-merge if valid
+        if: steps.validate.outputs.valid == '0'
+        uses: pascalgn/automerge-action@v0.16.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: squash
+          MERGE_COMMIT_MESSAGE: "✅ Solution accepted: Day ${{ steps.solver.outputs.day }} by @${{ steps.solver.outputs.solver }}"
+      
+      - name: Auto-close if invalid
+        if: steps.validate.outputs.valid != '0'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '**❌ Solution Rejected**\n\nYour PR has been automatically closed because the solution is incorrect. Please review the feedback above, fix your solution, and submit a new PR.\n\n*The relay encourages you to try again. Persistence is key.*'
+            });
+            
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            });
+      
+      - name: Add labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = [];
+            
+            if (${{ steps.validate.outputs.valid }} === 0) {
+              labels.push('✅ valid-solution', 'auto-merge');
+            } else {
+              labels.push('❌ invalid-solution');
+            }
+            
+            if (${{ steps.first_solve.outputs.is_first }} === 'true') {
+              labels.push('🥇 first-solve');
+            }
+            
+            const streak = parseInt(${{ steps.streak.outputs.streak }});
+            if (streak >= 3) labels.push('🔥 streak');
+            if (streak >= 7) labels.push('⚡ legendary');
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });

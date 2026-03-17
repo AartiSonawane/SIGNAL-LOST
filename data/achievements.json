@@ -1,0 +1,62 @@
+{
+  "first_blood": {
+    "name": "🥇 First Blood",
+    "description": "Be the first to solve any puzzle",
+    "points": 100,
+    "secret": false
+  },
+  "speed_demon": {
+    "name": "⚡ Speed Demon",
+    "description": "Solve a puzzle within 1 hour of release",
+    "points": 50,
+    "secret": false
+  },
+  "perfectionist": {
+    "name": "✨ Perfectionist",
+    "description": "Solve 10 puzzles without a single wrong submission",
+    "points": 200,
+    "secret": true
+  },
+  "marathon_runner": {
+    "name": "🏃 Marathon Runner",
+    "description": "Maintain a 7-day solve streak",
+    "points": 150,
+    "secret": false
+  },
+  "night_owl": {
+    "name": "🦉 Night Owl",
+    "description": "Submit a solution between 2 AM and 5 AM",
+    "points": 25,
+    "secret": true
+  },
+  "code_master": {
+    "name": "💻 Code Master",
+    "description": "Solve 5 coding challenges",
+    "points": 75,
+    "secret": false
+  },
+  "cipher_sage": {
+    "name": "🔐 Cipher Sage",
+    "description": "Solve 5 cipher puzzles",
+    "points": 75,
+    "secret": false
+  },
+  "triple_threat": {
+    "name": "🎯 Triple Threat",
+    "description": "Solve one of each puzzle type in a week",
+    "points": 100,
+    "secret": false
+  },
+  "comeback_kid": {
+    "name": "🔄 Comeback Kid",
+    "description": "Solve a puzzle after 3 failed attempts",
+    "points": 50,
+    "secret": true
+  },
+  "the_collector": {
+    "name": "📚 The Collector",
+    "description": "Unlock all non-secret achievements",
+    "points": 500,
+    "secret": true
+  }
+}

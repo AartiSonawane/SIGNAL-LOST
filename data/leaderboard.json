@@ -1,0 +1,29 @@
+{
+  "Alice": {
+    "total_solves": 3,
+    "first_solves": 2,
+    "days_solved": [
+      1,
+      2,
+      3
+    ],
+    "streak": 3,
+    "max_streak": 3,
+    "points": 230,
+    "rank": "\ud83c\udf17 Relay Technician",
+    "joined": "2026-03-17T17:32:41.347999"
+  },
+  "Bob": {
+    "total_solves": 2,
+    "first_solves": 0,
+    "days_solved": [
+      1,
+      3
+    ],
+    "streak": 1,
+    "max_streak": 1,
+    "points": 20,
+    "rank": "\ud83c\udf11 Novice Operator",
+    "joined": "2026-03-17T17:32:41.351754"
+  }
+}

@@ -1,0 +1,70 @@
+name: Update Leaderboard
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'solutions/**'
+
+jobs:
+  update:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Extract solver info from merged PR
+        id: info
+        run: |
+          # Get the merged file
+          FILES=$(git diff --name-only HEAD~1 HEAD | grep 'solutions/')
+          
+          for file in $FILES; do
+            SOLVER=$(grep -oP '\*\*GitHub Username\*\*:\s*`\K[^`]+' "$file")
+            DAY=$(grep -oP '\*\*Day / Puzzle Reference\*\*:\s*`Day (\d+)' "$file" | grep -oP '\d+')
+            
+            echo "solver=$SOLVER" >> $GITHUB_OUTPUT
+            echo "day=$DAY" >> $GITHUB_OUTPUT
+          done
+      
+      - name: Check if first solve
+        id: first
+        run: |
+          DAY=${{ steps.info.outputs.day }}
+          COUNT=$(find solutions/ -name "*day-${DAY}*" | wc -l)
+          
+          if [ $COUNT -eq 1 ]; then
+            echo "is_first=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_first=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Update leaderboard
+        run: |
+          python -c "
+from scripts.leaderboard import Leaderboard
+
+lb = Leaderboard()
+lb.add_solve(
+    solver='${{ steps.info.outputs.solver }}',
+    day=int('${{ steps.info.outputs.day }}'),
+    is_first=${{ steps.first.outputs.is_first }}
+)
+          "
+      
+      - name: Commit leaderboard changes
+        run: |
+          git config user.name "SIGNAL-LOST Bot"
+          git config user.email "bot@signal-lost.com"
+          
+          git add data/leaderboard.json
+          git commit -m "📊 Leaderboard updated: ${{ steps.info.outputs.solver }} solved Day ${{ steps.info.outputs.day }}"
+          git push

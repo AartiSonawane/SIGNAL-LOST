@@ -1,0 +1,44 @@
+{
+  "day_1": {
+    "type": "cipher",
+    "answer": "THE CRAZY KEY IS MY SECRET POST",
+    "hint_1": "The alphabet has been shifted...",
+    "hint_2": "ROT13 is a classic cipher...",
+    "hint_3": "Each letter maps to another 13 positions away."
+  },
+  "day_2": {
+    "type": "cipher",
+    "answer": "THE CRAZY KEY IS MY SECRET POST",
+    "hint_1": "The alphabet has been shifted...",
+    "hint_2": "ROT13 is a classic cipher...",
+    "hint_3": "Each letter maps to another 13 positions away."
+  },
+  "day_3": {
+    "type": "code",
+    "function_name": "decode_relay_message",
+    "test_cases": [
+      {
+        "input": "10101010",
+        "expected": "**"
+      },
+      {
+        "input": "11110000",
+        "expected": "ð"
+      },
+      {
+        "input": "01010101",
+        "expected": "U"
+      }
+    ],
+    "hint_1": "Binary patterns represent ASCII...",
+    "hint_2": "Split into 8-bit chunks...",
+    "hint_3": "Convert each byte to a character."
+  },
+  "day_4": {
+    "type": "logic",
+    "answer": "42",
+    "hint_1": "Consider the sequence pattern...",
+    "hint_2": "Each number relates to the previous...",
+    "hint_3": "It's not addition or multiplication."
+  }
+}
